@@ -1,82 +1,112 @@
-''' Practical 4:-
-Graph Coloring Problem using Backtracking and Branch & Bound '''
+'''
+Practical:- 4
+Aim: Implement a solution for Constraint Satisfaction Problem
+using Backtracking and Branch & Bound for N-Queens Problem
 
-# Check whether color can be assigned
-def is_safe(node, graph, colors, color, n):
-
-    for k in range(n):
-
-        if graph[node][k] == 1 and colors[k] == color:
-            return False
-
-    return True
-
-# Backtracking function
-def solve_graph_coloring(graph, m, colors, node, n):
-
-    # All vertices colored
-    if node == n:
-        return True
-
-    # Try different colors
-    for color in range(1, m + 1):
-
-        if is_safe(node, graph, colors, color, n):
-
-            colors[node] = color
-
-            if solve_graph_coloring(graph, m, colors, node + 1, n):
-                return True
-
-            # Backtrack
-            colors[node] = 0
-
-    return False
-
-# Main Program
-n = int(input("Enter number of vertices: "))
-
-print("\nEnter adjacency matrix:")
-
-graph = []
-
-for i in range(n):
-    row = list(map(int, input().split()))
-    graph.append(row)
-
-m = int(input("\nEnter number of colors: "))
-
-colors = [0] * n
-
-if solve_graph_coloring(graph, m, colors, 0, n):
-
-    print("\nSolution Exists!")
-
-    for i in range(n):
-        print("Vertex", i, "-> Color", colors[i])
-
-else:
-    print("\nNo solution exists!")
-
+Python Program for N-Queens Problem using Branch and Bound
 
 '''
-Input
+class NQueens:
+    def __init__(self, n):
+        self.n = n
 
-Enter number of vertices: 4
+        # Create chessboard initialized with 0
+        self.board = [[0 for _ in range(n)] for _ in range(n)]
 
-Enter adjacency matrix:
-0 1 1 1
-1 0 1 0
-1 1 0 1
-1 0 1 0
+        # Arrays for Branch and Bound optimization
+        self.rows = [False] * n
+        self.upperDiagonal = [False] * (2 * n - 1)
+        self.lowerDiagonal = [False] * (2 * n - 1)
 
-Enter number of colors: 3
+    # Function to solve N-Queens problem
+    def solveNQUtil(self, col):
 
-Output
-Solution Exists!
+        # Base Case: If all queens are placed
+        if col >= self.n:
+            return True
 
-Vertex 0 -> Color 1
-Vertex 1 -> Color 2
-Vertex 2 -> Color 3
-Vertex 3 -> Color 2
+        # Try placing queen in all rows one by one
+        for i in range(self.n):
+
+            # Check if queen can be placed safely
+            if (self.rows[i] == False and
+                self.lowerDiagonal[i + col] == False and
+                self.upperDiagonal[self.n - 1 + col - i] == False):
+
+                # Place the queen
+                self.board[i][col] = 1
+
+                # Mark row and diagonals as occupied
+                self.rows[i] = True
+                self.lowerDiagonal[i + col] = True
+                self.upperDiagonal[self.n - 1 + col - i] = True
+
+                # Recur to place rest of the queens
+                if self.solveNQUtil(col + 1):
+                    return True
+
+                # BACKTRACKING
+                # Remove queen if solution not found
+                self.board[i][col] = 0
+
+                # Unmark row and diagonals
+                self.rows[i] = False
+                self.lowerDiagonal[i + col] = False
+                self.upperDiagonal[self.n - 1 + col - i] = False
+
+        # If queen cannot be placed in any row
+        return False
+
+    # Function to print solution
+    def printSolution(self):
+
+        if self.solveNQUtil(0) == False:
+            print("Solution does not exist")
+            return
+
+        print(f"\nSolution for {self.n}-Queens Problem:\n")
+
+        for i in range(self.n):
+            for j in range(self.n):
+                print(self.board[i][j], end=" ")
+            print()
+
+        print("\nChessboard Representation:\n")
+
+        for i in range(self.n):
+            for j in range(self.n):
+                if self.board[i][j] == 1:
+                    print("Q", end=" ")
+                else:
+                    print(".", end=" ")
+            print()
+
+
+# Driver Code
+if __name__ == "__main__":
+
+    n = int(input("Enter value of N: "))
+
+    queens = NQueens(n)
+    queens.printSolution()
+
+'''
+
+Enter value of N: 4
+
+Solution for 4-Queens Problem:
+
+0 0 1 0
+1 0 0 0
+0 0 0 1
+0 1 0 0
+
+Chessboard Representation:
+
+. . Q .
+Q . . .
+. . . Q
+. Q . .
+
+
 '''
